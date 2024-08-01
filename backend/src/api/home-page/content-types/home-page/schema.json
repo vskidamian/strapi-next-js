@@ -19,6 +19,12 @@
     "desc": {
       "type": "text",
       "required": true
+    },
+    "blocks": {
+      "type": "dynamiczone",
+      "components": [
+        "layout.hero-section"
+      ]
     }
   }
 }
