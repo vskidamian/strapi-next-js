@@ -1,50 +1,51 @@
-import qs from "qs";
-import { Button } from "@/components/ui/button";
-import { flattenAttributes } from "@/lib/utils";
+import { FeatureSection } from "@/components/custom/FeaturesSection";
 import { HeroSection } from "@/components/custom/HeroSection";
+import { fetchData } from "@/data/loaders";
+import { getStrapiURL } from "@/lib/utils";
+import qs from "qs";
 
-const homePageQuery = qs.stringify({
-  populate: {
-    blocks: {
-      populate: {
-        image: {
-          fields: ["url", "alternativeText"],
-        },
-        link: {
-          populate: true,
+export async function getHomePageData() {
+  const baseUrl = getStrapiURL();
+  const url = new URL("/api/home-page", baseUrl);
+
+  url.search = qs.stringify({
+    populate: {
+      blocks: {
+        populate: {
+          image: {
+            fields: ["url", "alternativeText"],
+          },
+          link: {
+            populate: true,
+          },
+          feature: {
+            populate: true,
+          },
         },
       },
     },
-  },
-});
+  });
 
-async function getStrapiData(path: string) {
-  const baseUrl = process.env.STRAPI_API_URL;
-
-  const url = new URL(path, baseUrl);
-  url.search = homePageQuery;
-
-  try {
-    const response = await fetch(url.href, { cache: "no-store" });
-    const data = await response.json();
-
-    const flattenData = flattenAttributes(data);
-
-    return flattenData;
-  } catch (error) {
-    console.error(error);
-    return undefined;
-  }
+  return await fetchData(url.href);
 }
 
 export default async function Home() {
-  const strapiData = await getStrapiData("/api/home-page");
+  const strapiData = await getHomePageData();
+
+  if (!strapiData) return null;
 
   const { blocks } = strapiData;
 
-  return (
-    <main>
-      <HeroSection data={blocks[0]} />
-    </main>
-  );
+  return <main>{blocks.map(blockRenderer)}</main>;
+}
+
+function blockRenderer(block: any) {
+  switch (block.__component) {
+    case "layout.hero-section":
+      return <HeroSection key={block.id} data={block} />;
+    case "layout.features-section":
+      return <FeatureSection key={block.id} data={block} />;
+    default:
+      return null;
+  }
 }

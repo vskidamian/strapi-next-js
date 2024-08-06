@@ -376,7 +376,9 @@ export interface ApiHomePageHomePage extends Schema.SingleType {
   attributes: {
     title: Attribute.String & Attribute.Required;
     desc: Attribute.Text & Attribute.Required;
-    blocks: Attribute.DynamicZone<['layout.hero-section']>;
+    blocks: Attribute.DynamicZone<
+      ['layout.hero-section', 'layout.features-section']
+    >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
