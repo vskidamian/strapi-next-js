@@ -1,7 +1,16 @@
-import { flattenAttributes } from "@/lib/utils";
+import { flattenAttributes, getStrapiURL } from "@/lib/utils";
 import { notFound } from "next/navigation";
+import qs from "qs";
+import { unstable_noStore as noStore } from "next/cache";
 
-export async function fetchData(url: string) {
+export async function fetchData(
+  url: string,
+  options?: {
+    noStore?: boolean;
+  }
+) {
+  if (options?.noStore) noStore();
+
   const authToken = null; //todo: implement this later - getAuthToken()
   const headers = {
     method: "GET",
@@ -22,4 +31,20 @@ export async function fetchData(url: string) {
     console.error("Error fetching data:", error);
     throw error; // or return null;
   }
+}
+
+export async function getGlobalPageData() {
+  const baseUrl = getStrapiURL();
+  const url = new URL("/api/global", baseUrl);
+
+  url.search = qs.stringify({
+    populate: [
+      "header.logoText",
+      "header.ctaButton",
+      "footer.logoText",
+      "footer.socialLink",
+    ],
+  });
+
+  return await fetchData(url.href, { noStore: true });
 }
