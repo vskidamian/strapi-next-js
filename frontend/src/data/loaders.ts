@@ -48,3 +48,13 @@ export async function getGlobalPageData() {
 
   return await fetchData(url.href, { noStore: true });
 }
+
+export async function getGlobalPageMetadata() {
+  const url = new URL("/api/global", getStrapiURL());
+
+  url.search = qs.stringify({
+    fields: ["title", "description"],
+  });
+
+  return await fetchData(url.href, { noStore: true });
+}
